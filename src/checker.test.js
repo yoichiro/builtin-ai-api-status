@@ -1,4 +1,8 @@
-import { normalizeStatus, isApiSupported, validatePair, checkApi, checkTranslatorPair, checkAllApis } from './checker.js'
+import {
+  normalizeStatus, isApiSupported, validatePair,
+  checkApi, checkTranslatorPair, checkAllApis,
+  triggerDownload, triggerAllDownloads,
+} from './checker.js'
 
 describe('normalizeStatus', () => {
   it('passes through canonical values unchanged', () => {
@@ -117,5 +121,62 @@ describe('checkTranslatorPair', () => {
     })
     const result = await checkTranslatorPair('en', 'ja')
     expect(result.status).toBe('unavailable')
+  })
+})
+
+describe('triggerDownload', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('calls create() and fires onProgress via downloadprogress event', async () => {
+    const onProgress = vi.fn()
+    vi.stubGlobal('Summarizer', {
+      create: vi.fn(({ monitor }) => {
+        const m = {
+          addEventListener: (evt, cb) => {
+            if (evt === 'downloadprogress') cb({ loaded: 0.5, total: 1.0 })
+          },
+        }
+        monitor(m)
+        return Promise.resolve({})
+      }),
+    })
+    await triggerDownload('Summarizer', 'Summarizer', {}, onProgress)
+    expect(Summarizer.create).toHaveBeenCalled()
+    expect(onProgress).toHaveBeenCalledWith('Summarizer', 0.5, 1.0)
+  })
+
+  it('calls onProgress with error message when create() rejects', async () => {
+    const onProgress = vi.fn()
+    vi.stubGlobal('LanguageModel', {
+      create: vi.fn(() => Promise.reject(new Error('not supported'))),
+    })
+    await triggerDownload('LanguageModel', 'LanguageModel', {}, onProgress)
+    expect(onProgress).toHaveBeenCalledWith('LanguageModel', -1, -1, 'not supported')
+  })
+
+  it('does nothing when global is missing', async () => {
+    const onProgress = vi.fn()
+    await triggerDownload('LanguageDetector', 'LanguageDetector', {}, onProgress)
+    expect(onProgress).not.toHaveBeenCalled()
+  })
+})
+
+describe('triggerAllDownloads', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('triggers downloads only for downloadable and downloading APIs', async () => {
+    const onProgress = vi.fn()
+    vi.stubGlobal('Summarizer', {
+      create: vi.fn(({ monitor }) => {
+        monitor({ addEventListener: () => {} })
+        return Promise.resolve({})
+      }),
+    })
+    const apis = [
+      { id: 'LanguageDetector', status: 'available' },
+      { id: 'Summarizer',       status: 'downloadable' },
+    ]
+    await triggerAllDownloads(apis, [], onProgress)
+    expect(Summarizer.create).toHaveBeenCalled()
   })
 })

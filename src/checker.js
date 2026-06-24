@@ -72,3 +72,42 @@ export async function checkAllApis(translatorPairs) {
     pairs: results.slice(3),
   }
 }
+
+export async function triggerDownload(id, globalName, options, onProgress) {
+  if (!isApiSupported(globalName)) return
+  try {
+    await self[globalName].create({
+      ...options,
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => {
+          onProgress(id, e.loaded, e.total)
+        })
+      },
+    })
+  } catch (err) {
+    onProgress(id, -1, -1, err.message)
+  }
+}
+
+export async function triggerAllDownloads(apis, pairs, onProgress) {
+  const tasks = []
+
+  for (const api of apis) {
+    if (api.status !== 'downloadable' && api.status !== 'downloading') continue
+    tasks.push(triggerDownload(api.id, api.id, {}, onProgress))
+  }
+
+  for (const pair of pairs) {
+    if (pair.status !== 'downloadable' && pair.status !== 'downloading') continue
+    tasks.push(
+      triggerDownload(
+        pair.id,
+        'Translator',
+        { sourceLanguage: pair.src, targetLanguage: pair.tgt },
+        onProgress,
+      ),
+    )
+  }
+
+  await Promise.all(tasks)
+}
