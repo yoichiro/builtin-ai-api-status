@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Built-in AI API Status</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <header class="app-header">
+      <div class="app-title">built-in-ai-api-<span>status</span></div>
+      <div class="app-subtitle">ブラウザの組み込みAI機能が使えるか確認・ダウンロードします</div>
+      <div class="app-chrome-ver" data-chrome-ver>checking browser...</div>
+    </header>
+
+    <div class="controls">
+      <button class="btn btn-primary" data-btn-check>▶ Check Status</button>
+      <button class="btn" data-btn-download disabled>↓ Download All</button>
+    </div>
+
+    <section class="section">
+      <div class="section-label">── Status ──</div>
+      <div class="status-list" data-status-list></div>
+    </section>
+
+    <section class="section">
+      <div class="section-label">── Translator Pairs ──</div>
+      <div class="pair-list" data-pair-list></div>
+      <div class="pair-form">
+        <input class="pair-input" data-pair-src placeholder="en" maxlength="10" />
+        <span class="pair-arrow">→</span>
+        <input class="pair-input" data-pair-tgt placeholder="ja" maxlength="10" />
+        <button class="btn" data-btn-add-pair>+ Add</button>
+      </div>
+      <div class="pair-error" data-pair-error hidden></div>
+    </section>
+
+    <section class="section">
+      <div class="section-label">── Log ──</div>
+      <div class="log-list" data-log></div>
+    </section>
+
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
