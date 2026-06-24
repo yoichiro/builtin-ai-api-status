@@ -3,9 +3,9 @@ const STATUS_MAP = {
   downloadable:   'downloadable',
   downloading:    'downloading',
   unavailable:    'unavailable',
-  readily:        'available',
-  'after-download': 'downloadable',
-  unsupported:    'unavailable',
+  readily:        'available',      // legacy alias
+  'after-download': 'downloadable', // legacy alias
+  unsupported:    'unavailable',    // legacy alias from old API; distinct from 'unsupported' returned by checkApi() when global is missing
 }
 
 export function normalizeStatus(raw) {

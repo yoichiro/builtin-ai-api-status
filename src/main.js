@@ -105,7 +105,7 @@ async function runCheck() {
     setDownloadAllButton('downloading')
     const dlApis  = alreadyDownloading.filter(x => 'label' in x)
     const dlPairs = alreadyDownloading.filter(x => 'src' in x)
-    handleDownloads(dlApis, dlPairs)
+    await handleDownloads(dlApis, dlPairs)
   }
 
   if (btnCheck) { btnCheck.disabled = false; btnCheck.textContent = '▶ Check Status' }
