@@ -70,6 +70,6 @@ describe('validatePair', () => {
   })
 
   it('accepts valid BCP 47 with region subtag', () => {
-    expect(validatePair('zh', 'zh-Hant', [])).toEqual({ valid: true })
+    expect(validatePair('zh', 'zh-TW', [])).toEqual({ valid: true })
   })
 })
