@@ -1,4 +1,4 @@
-import { normalizeStatus, isApiSupported, validatePair } from './checker.js'
+import { normalizeStatus, isApiSupported, validatePair, checkApi, checkTranslatorPair, checkAllApis } from './checker.js'
 
 describe('normalizeStatus', () => {
   it('passes through canonical values unchanged', () => {
@@ -71,5 +71,51 @@ describe('validatePair', () => {
 
   it('accepts valid BCP 47 with region subtag', () => {
     expect(validatePair('zh', 'zh-TW', [])).toEqual({ valid: true })
+  })
+})
+
+describe('checkApi', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('returns unsupported when global is missing', async () => {
+    const result = await checkApi('LanguageDetector')
+    expect(result).toEqual({ id: 'LanguageDetector', label: 'Language Detector', status: 'unsupported' })
+  })
+
+  it('returns normalized status when global exists', async () => {
+    vi.stubGlobal('Summarizer', { availability: async () => 'readily' })
+    const result = await checkApi('Summarizer')
+    expect(result.status).toBe('available')
+  })
+
+  it('returns unavailable when availability() throws', async () => {
+    vi.stubGlobal('LanguageModel', { availability: async () => { throw new Error('fail') } })
+    const result = await checkApi('LanguageModel')
+    expect(result.status).toBe('unavailable')
+  })
+})
+
+describe('checkTranslatorPair', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('returns unsupported when Translator global is missing', async () => {
+    const result = await checkTranslatorPair('en', 'ja')
+    expect(result).toEqual({ id: 'Translator-en-ja', src: 'en', tgt: 'ja', status: 'unsupported' })
+  })
+
+  it('returns normalized status for a valid pair', async () => {
+    vi.stubGlobal('Translator', {
+      availability: async () => 'downloadable',
+    })
+    const result = await checkTranslatorPair('en', 'ja')
+    expect(result.status).toBe('downloadable')
+  })
+
+  it('returns unavailable when availability() throws', async () => {
+    vi.stubGlobal('Translator', {
+      availability: async () => { throw new Error('fail') },
+    })
+    const result = await checkTranslatorPair('en', 'ja')
+    expect(result.status).toBe('unavailable')
   })
 })

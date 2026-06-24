@@ -28,3 +28,47 @@ export function validatePair(src, tgt, existingPairs) {
     return { valid: false, error: `Pair ${src}→${tgt} already added` }
   return { valid: true }
 }
+
+const API_LABELS = {
+  LanguageDetector: 'Language Detector',
+  Summarizer:       'Summarizer',
+  LanguageModel:    'Prompt (LanguageModel)',
+}
+
+export async function checkApi(globalName, options = {}) {
+  if (!isApiSupported(globalName)) {
+    return { id: globalName, label: API_LABELS[globalName] ?? globalName, status: 'unsupported' }
+  }
+  try {
+    const raw = await self[globalName].availability(options)
+    return { id: globalName, label: API_LABELS[globalName] ?? globalName, status: normalizeStatus(raw) }
+  } catch {
+    return { id: globalName, label: API_LABELS[globalName] ?? globalName, status: 'unavailable' }
+  }
+}
+
+export async function checkTranslatorPair(src, tgt) {
+  const id = `Translator-${src}-${tgt}`
+  if (!isApiSupported('Translator')) {
+    return { id, src, tgt, status: 'unsupported' }
+  }
+  try {
+    const raw = await Translator.availability({ sourceLanguage: src, targetLanguage: tgt })
+    return { id, src, tgt, status: normalizeStatus(raw) }
+  } catch {
+    return { id, src, tgt, status: 'unavailable' }
+  }
+}
+
+export async function checkAllApis(translatorPairs) {
+  const results = await Promise.all([
+    checkApi('LanguageDetector'),
+    checkApi('Summarizer'),
+    checkApi('LanguageModel'),
+    ...translatorPairs.map(p => checkTranslatorPair(p.src, p.tgt)),
+  ])
+  return {
+    apis:  results.slice(0, 3),
+    pairs: results.slice(3),
+  }
+}
