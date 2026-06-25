@@ -89,4 +89,19 @@ describe('runPrompt', () => {
     expect(onChunk).toHaveBeenCalledWith('part')
     expect(destroy).toHaveBeenCalled()
   })
+
+  it('resolves with empty text when aborted during create()', async () => {
+    const destroy = vi.fn()
+    vi.stubGlobal('LanguageModel', {
+      create: vi.fn(async () => {
+        const err = new Error('aborted')
+        err.name = 'AbortError'
+        throw err
+      }),
+    })
+    const controller = new AbortController()
+    const full = await runPrompt({ prompt: 'p', signal: controller.signal, onChunk: vi.fn() })
+    expect(full).toBe('')
+    expect(destroy).not.toHaveBeenCalled()
+  })
 })

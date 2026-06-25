@@ -24,9 +24,10 @@ export async function runPrompt({ systemPrompt, temperature, topK, prompt, signa
     opts.initialPrompts = [{ role: 'system', content: systemPrompt }]
   }
 
-  const session = await LanguageModel.create(opts)
+  let session
   let full = ''
   try {
+    session = await LanguageModel.create(opts)
     for await (const chunk of session.promptStreaming(prompt, { signal })) {
       full += chunk
       onChunk?.(chunk)
@@ -36,6 +37,6 @@ export async function runPrompt({ systemPrompt, temperature, topK, prompt, signa
     if (err?.name === 'AbortError' || signal?.aborted) return full
     throw err
   } finally {
-    session.destroy()
+    session?.destroy()
   }
 }

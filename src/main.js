@@ -155,8 +155,12 @@ async function openPlayground() {
   if (!dialog) return
   try {
     const p = await getParams()
-    document.querySelector('[data-pg-temp]').value = p.defaultTemperature
-    document.querySelector('[data-pg-topk]').value = p.defaultTopK
+    const tempEl = document.querySelector('[data-pg-temp]')
+    const topkEl = document.querySelector('[data-pg-topk]')
+    tempEl.value = p.defaultTemperature
+    tempEl.max = p.maxTemperature
+    topkEl.value = p.defaultTopK
+    topkEl.max = p.maxTopK
   } catch {
     // Leave inputs at their current values if params() is unavailable.
   }
