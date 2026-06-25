@@ -20,11 +20,15 @@ import {
   renderDetectorResults,
   clearDetectorResults,
   showDetectorError,
+  clearSummary,
+  appendSummary,
+  showSummarizerError,
 } from './ui.js'
 
 import { loadPairs, savePairs } from './storage.js'
 import { getParams, runPrompt } from './playground.js'
 import { createDetector, detectLanguages } from './detector.js'
+import { summarize } from './summarizer.js'
 
 const DEFAULT_PAIRS = [
   { src: 'en', tgt: 'ja' },
@@ -110,6 +114,10 @@ async function runCheck() {
 
   if (state.apis.find(a => a.id === 'LanguageDetector')?.status === 'available') {
     showPlaygroundButton('LanguageDetector')
+  }
+
+  if (state.apis.find(a => a.id === 'Summarizer')?.status === 'available') {
+    showPlaygroundButton('Summarizer')
   }
 
   for (const pair of state.pairs) {
@@ -236,6 +244,39 @@ function onDetectorInput() {
   ldDebounceId = setTimeout(runDetect, 250)
 }
 
+let smController = null
+
+function setSummarizerRunning(running) {
+  const btn = document.querySelector('[data-sm-run]')
+  if (btn) btn.textContent = running ? '⏹ Stop' : '▶ Run'
+}
+
+function openSummarizerPlayground() {
+  const dialog = document.querySelector('[data-sm-playground]')
+  if (!dialog) return
+  clearSummary()
+  dialog.showModal()
+}
+
+async function runSummarize() {
+  const text = document.querySelector('[data-sm-input]').value.trim()
+  if (!text) { showSummarizerError('Enter text to summarize'); return }
+  const type = document.querySelector('[data-sm-type]').value
+  const format = document.querySelector('[data-sm-format]').value
+  const length = document.querySelector('[data-sm-length]').value
+  clearSummary()
+  smController = new AbortController()
+  setSummarizerRunning(true)
+  try {
+    await summarize({ type, format, length, text, signal: smController.signal, onChunk: appendSummary })
+  } catch (err) {
+    showSummarizerError(err.message)
+  } finally {
+    setSummarizerRunning(false)
+    smController = null
+  }
+}
+
 function init() {
   detectChromeVersion()
 
@@ -267,6 +308,7 @@ function init() {
     if (!btn) return
     if (btn.dataset.playgroundFor === 'LanguageModel') openPlayground()
     else if (btn.dataset.playgroundFor === 'LanguageDetector') openDetectorPlayground()
+    else if (btn.dataset.playgroundFor === 'Summarizer') openSummarizerPlayground()
   })
 
   // Run button doubles as Stop while a request is in flight.
@@ -288,6 +330,17 @@ function init() {
     clearTimeout(ldDebounceId)
     ldDetector?.destroy()
     ldDetector = null
+  })
+
+  // Summarizer Run button doubles as Stop while a request is in flight.
+  document.querySelector('[data-sm-run]')?.addEventListener('click', () => {
+    if (smController) smController.abort()
+    else runSummarize()
+  })
+
+  // Closing the Summarizer dialog (✕ or Esc) aborts any in-flight request.
+  document.querySelector('[data-sm-playground]')?.addEventListener('close', () => {
+    if (smController) smController.abort()
   })
 
   runCheck()
