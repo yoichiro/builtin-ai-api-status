@@ -15,14 +15,18 @@ import {
   clearPairError,
 } from './ui.js'
 
+import { loadPairs, savePairs } from './storage.js'
+
 const DEFAULT_PAIRS = [
   { src: 'en', tgt: 'ja' },
   { src: 'ja', tgt: 'en' },
 ]
 
+const initialPairs = loadPairs() ?? DEFAULT_PAIRS
+
 const state = {
   apis:  [],
-  pairs: DEFAULT_PAIRS.map(p => ({ ...p, id: `Translator-${p.src}-${p.tgt}`, status: 'unsupported' })),
+  pairs: initialPairs.map(p => ({ ...p, id: `Translator-${p.src}-${p.tgt}`, status: 'unsupported' })),
 }
 
 const LOG_FOR_STATUS = {
@@ -119,6 +123,7 @@ async function addPair(src, tgt) {
 
   const result = await checkTranslatorPair(src, tgt)
   state.pairs.push(result)
+  savePairs(state.pairs)
   renderPairRow(result.id, result.src, result.tgt, result.status)
   const { msg, type } = logForStatus(`Translator ${src}→${tgt}`, result.status)
   appendLog(msg, type)
