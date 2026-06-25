@@ -221,3 +221,22 @@ body {
 .log-warn { color: var(--warn); }
 .log-info { color: var(--info); }
 .log-err  { color: var(--err); }
+
+/* Footer note */
+.app-footer {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.app-footer code {
+  color: var(--info);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  user-select: all;
+}
