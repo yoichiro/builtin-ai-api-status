@@ -35,6 +35,13 @@ const API_LABELS = {
   LanguageModel:    'Prompt (LanguageModel)',
 }
 
+export const API_DOCS = {
+  LanguageDetector: 'https://developer.chrome.com/docs/ai/language-detection',
+  Translator:       'https://developer.chrome.com/docs/ai/translator-api',
+  Summarizer:       'https://developer.chrome.com/docs/ai/summarizer-api',
+  LanguageModel:    'https://developer.chrome.com/docs/ai/prompt-api',
+}
+
 export async function checkApi(globalName, options = {}) {
   if (!isApiSupported(globalName)) {
     return { id: globalName, label: API_LABELS[globalName] ?? globalName, status: 'unsupported' }

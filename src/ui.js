@@ -1,3 +1,5 @@
+import { API_DOCS } from './checker.js'
+
 const STATUS_META = {
   available:    { cls: 'status-ok',   tag: '[OK]  ', icon: '✓' },
   downloadable: { cls: 'status-warn', tag: '[DL]  ', icon: '⚡' },
@@ -33,12 +35,17 @@ function buildRow(id, cols) {
   return row
 }
 
-function rowCols(label, status) {
+function docLinkHtml(docUrl) {
+  if (!docUrl) return ''
+  return ` <a class="doc-link" href="${docUrl}" target="_blank" rel="noopener" title="Open documentation">[docs ↗]</a>`
+}
+
+function rowCols(label, status, docUrl) {
   const meta = STATUS_META[status] ?? STATUS_META.unsupported
   return `
     <span class="status-ts">${getTimestamp()}</span>
     <span class="status-tag">${meta.tag}</span>
-    <span class="status-name">${label}</span>
+    <span class="status-name">${label}${docLinkHtml(docUrl)}</span>
     <span class="status-val">${status}</span>
   `
 }
@@ -54,7 +61,7 @@ export function renderApiRow(id, label, status) {
   let row = container.querySelector(`[data-row-id="${id}"]`)
   if (!row) { row = buildRow(id, ''); container.appendChild(row) }
   applyRowClass(row, status)
-  row.innerHTML = rowCols(label, status)
+  row.innerHTML = rowCols(label, status, API_DOCS[id])
 }
 
 export function renderPairRow(id, src, tgt, status) {

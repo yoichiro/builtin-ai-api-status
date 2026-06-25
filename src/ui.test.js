@@ -57,6 +57,20 @@ describe('renderApiRow', () => {
     const row = document.querySelector('[data-row-id="LanguageModel"]')
     expect(row.classList.contains('is-na')).toBe(true)
   })
+
+  it('adds a documentation link for a known API id', () => {
+    renderApiRow('Summarizer', 'Summarizer', 'available')
+    const link = document.querySelector('[data-row-id="Summarizer"] a.doc-link')
+    expect(link).not.toBeNull()
+    expect(link.getAttribute('href')).toBe('https://developer.chrome.com/docs/ai/summarizer-api')
+    expect(link.getAttribute('target')).toBe('_blank')
+    expect(link.getAttribute('rel')).toContain('noopener')
+  })
+
+  it('omits the documentation link for an unknown API id', () => {
+    renderApiRow('Unknown', 'Unknown', 'available')
+    expect(document.querySelector('[data-row-id="Unknown"] a.doc-link')).toBeNull()
+  })
 })
 
 describe('renderProgress', () => {

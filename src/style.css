@@ -133,6 +133,17 @@ body {
 .status-name { color: var(--text); white-space: nowrap; }
 .status-val  { color: var(--muted); text-align: right; }
 
+.doc-link {
+  color: var(--info);
+  text-decoration: none;
+  font-size: 12px;
+  text-transform: uppercase;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+.doc-link:hover { opacity: 1; text-decoration: underline; }
+.section-label .doc-link { font-size: 11px; }
+
 .status-ok   .status-tag, .status-ok   .status-val { color: var(--ok); }
 .status-warn .status-tag, .status-warn .status-val { color: var(--warn); }
 .status-info .status-tag, .status-info .status-val { color: var(--info); }
