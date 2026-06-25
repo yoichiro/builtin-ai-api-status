@@ -403,3 +403,17 @@ body {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+
+/* Summarizer option selects */
+.playground-params { flex-wrap: wrap; }
+.playground-select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  border-radius: 3px;
+  padding: 4px 8px;
+  margin-left: 6px;
+}
+.playground-select:focus { outline: none; border-color: var(--info); }
