@@ -13,9 +13,14 @@ import {
   setDownloadAllButton,
   showPairError,
   clearPairError,
+  showPlaygroundButton,
+  clearPlaygroundResponse,
+  appendPlaygroundResponse,
+  showPlaygroundError,
 } from './ui.js'
 
 import { loadPairs, savePairs } from './storage.js'
+import { getParams, runPrompt } from './playground.js'
 
 const DEFAULT_PAIRS = [
   { src: 'en', tgt: 'ja' },
@@ -95,6 +100,10 @@ async function runCheck() {
     appendLog(msg, type)
   }
 
+  if (state.apis.find(a => a.id === 'LanguageModel')?.status === 'available') {
+    showPlaygroundButton()
+  }
+
   for (const pair of state.pairs) {
     renderPairRow(pair.id, pair.src, pair.tgt, pair.status)
     const { msg, type } = logForStatus(`Translator ${pair.src}→${pair.tgt}`, pair.status)
@@ -134,6 +143,55 @@ async function addPair(src, tgt) {
   document.querySelector('[data-pair-tgt]').value = ''
 }
 
+let pgController = null
+
+function setPlaygroundRunning(running) {
+  const btn = document.querySelector('[data-pg-run]')
+  if (btn) btn.textContent = running ? '⏹ Stop' : '▶ Run'
+}
+
+async function openPlayground() {
+  const dialog = document.querySelector('[data-playground]')
+  if (!dialog) return
+  try {
+    const p = await getParams()
+    document.querySelector('[data-pg-temp]').value = p.defaultTemperature
+    document.querySelector('[data-pg-topk]').value = p.defaultTopK
+  } catch {
+    // Leave inputs at their current values if params() is unavailable.
+  }
+  clearPlaygroundResponse()
+  dialog.showModal()
+}
+
+async function runPlayground() {
+  const systemPrompt = document.querySelector('[data-pg-system]').value.trim()
+  const prompt = document.querySelector('[data-pg-prompt]').value.trim()
+  if (!prompt) { showPlaygroundError('Enter a prompt first'); return }
+
+  const tempVal = parseFloat(document.querySelector('[data-pg-temp]').value)
+  const topKVal = parseInt(document.querySelector('[data-pg-topk]').value, 10)
+
+  clearPlaygroundResponse()
+  pgController = new AbortController()
+  setPlaygroundRunning(true)
+  try {
+    await runPrompt({
+      systemPrompt,
+      temperature: Number.isNaN(tempVal) ? null : tempVal,
+      topK: Number.isNaN(topKVal) ? null : topKVal,
+      prompt,
+      signal: pgController.signal,
+      onChunk: appendPlaygroundResponse,
+    })
+  } catch (err) {
+    showPlaygroundError(err.message)
+  } finally {
+    setPlaygroundRunning(false)
+    pgController = null
+  }
+}
+
 function init() {
   detectChromeVersion()
 
@@ -157,6 +215,22 @@ function init() {
 
   document.querySelector('[data-pair-tgt]')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') document.querySelector('[data-btn-add-pair]')?.click()
+  })
+
+  // Open the Playground from the inline button (delegated — button is dynamic).
+  document.querySelector('[data-status-list]')?.addEventListener('click', (e) => {
+    if (e.target.closest('[data-btn-playground]')) openPlayground()
+  })
+
+  // Run button doubles as Stop while a request is in flight.
+  document.querySelector('[data-pg-run]')?.addEventListener('click', () => {
+    if (pgController) pgController.abort()
+    else runPlayground()
+  })
+
+  // Closing the dialog (✕ or Esc) aborts any in-flight request.
+  document.querySelector('[data-playground]')?.addEventListener('close', () => {
+    if (pgController) pgController.abort()
   })
 
   runCheck()
