@@ -51,6 +51,32 @@
       To uninstall a downloaded model, open <code>chrome://on-device-internals/</code> and remove it there.
     </footer>
 
+    <dialog class="playground" data-playground>
+      <form method="dialog" class="playground-head">
+        <span class="playground-title">▶ Prompt Playground</span>
+        <button class="playground-close" data-pg-close aria-label="Close">✕</button>
+      </form>
+
+      <label class="playground-label">System prompt</label>
+      <textarea class="playground-input" data-pg-system rows="2" placeholder="You are a helpful assistant."></textarea>
+
+      <div class="playground-params">
+        <label>Temperature <input type="number" step="0.1" min="0" class="playground-num" data-pg-temp /></label>
+        <label>Top-K <input type="number" step="1" min="1" class="playground-num" data-pg-topk /></label>
+      </div>
+
+      <label class="playground-label">Prompt</label>
+      <textarea class="playground-input" data-pg-prompt rows="4" placeholder="Ask anything..."></textarea>
+
+      <div class="playground-actions">
+        <button class="btn btn-primary" data-pg-run>▶ Run</button>
+      </div>
+
+      <div class="section-label">── Response ──</div>
+      <div class="playground-response" data-pg-response></div>
+      <div class="pair-error" data-pg-error hidden></div>
+    </dialog>
+
   </div>
   <script type="module" src="/src/main.js"></script>
 </body>
