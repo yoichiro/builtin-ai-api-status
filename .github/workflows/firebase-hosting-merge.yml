@@ -22,9 +22,24 @@ jobs:
 
       - run: npm run build
 
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          channelId: live
-          projectId: builtin-ai-api-status
+      - name: Deploy to Firebase Hosting (with retry)
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-key.json
+          PROJECT_ID: builtin-ai-api-status
+        run: |
+          printf '%s' "$FIREBASE_SA" > "$GOOGLE_APPLICATION_CREDENTIALS"
+          trap 'rm -f "$GOOGLE_APPLICATION_CREDENTIALS"' EXIT
+          for attempt in 1 2 3 4 5; do
+            echo "::group::Deploy attempt $attempt"
+            if npx firebase-tools@latest deploy --only hosting --project "$PROJECT_ID" --non-interactive; then
+              echo "::endgroup::"
+              echo "Deploy succeeded on attempt $attempt"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "Attempt $attempt failed; retrying in 15s..."
+            sleep 15
+          done
+          echo "All deploy attempts failed"
+          exit 1
