@@ -370,3 +370,36 @@ body {
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* Language Detector results */
+.detector-results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.detector-row {
+  display: grid;
+  grid-template-columns: 1fr 48px max-content 56px;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+}
+.detector-bar {
+  height: 8px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.detector-fill {
+  height: 100%;
+  background: var(--ok);
+  border-radius: 2px;
+  transition: width 0.2s ease;
+}
+.detector-code { color: var(--info); font-weight: 700; }
+.detector-name { color: var(--text); white-space: nowrap; }
+.detector-pct {
+  color: var(--muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

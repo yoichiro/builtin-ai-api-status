@@ -77,6 +77,20 @@
       <div class="pair-error" data-pg-error hidden></div>
     </dialog>
 
+    <dialog class="playground" data-ld-playground>
+      <form method="dialog" class="playground-head">
+        <span class="playground-title">▶ Language Detector Playground</span>
+        <button class="playground-close" data-ld-close aria-label="Close">✕</button>
+      </form>
+
+      <label class="playground-label">Text</label>
+      <textarea class="playground-input" data-ld-input rows="4" placeholder="Type text to detect its language..."></textarea>
+
+      <div class="section-label">── Detected languages ──</div>
+      <div class="detector-results" data-ld-results></div>
+      <div class="pair-error" data-ld-error hidden></div>
+    </dialog>
+
   </div>
   <script type="module" src="/src/main.js"></script>
 </body>
