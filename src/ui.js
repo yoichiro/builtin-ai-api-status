@@ -126,14 +126,14 @@ export function clearPairError() {
   el.textContent = ''
 }
 
-export function showPlaygroundButton() {
-  const row = document.querySelector('[data-status-list] [data-row-id="LanguageModel"]')
+export function showPlaygroundButton(rowId) {
+  const row = document.querySelector(`[data-status-list] [data-row-id="${rowId}"]`)
   if (!row) return
   const name = row.querySelector('.status-name')
-  if (!name || name.querySelector('[data-btn-playground]')) return
+  if (!name || name.querySelector('.btn-playground')) return
   const btn = document.createElement('button')
-  btn.dataset.btnPlayground = ''
   btn.className = 'btn-playground'
+  btn.dataset.playgroundFor = rowId
   btn.textContent = '▶ Playground'
   name.appendChild(btn)
 }

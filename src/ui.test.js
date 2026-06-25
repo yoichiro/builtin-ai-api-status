@@ -134,24 +134,25 @@ describe('showPairError / clearPairError', () => {
 describe('showPlaygroundButton', () => {
   beforeEach(setupDOM)
 
-  it('inserts a playground button into the LanguageModel row', () => {
+  it('inserts a playground button with data-playground-for into the row', () => {
     renderApiRow('LanguageModel', 'Prompt (LanguageModel)', 'available')
-    showPlaygroundButton()
-    const btn = document.querySelector('[data-row-id="LanguageModel"] [data-btn-playground]')
+    showPlaygroundButton('LanguageModel')
+    const btn = document.querySelector('[data-row-id="LanguageModel"] .btn-playground')
     expect(btn).not.toBeNull()
+    expect(btn.dataset.playgroundFor).toBe('LanguageModel')
     expect(btn.textContent).toContain('Playground')
   })
 
   it('does not duplicate the button on repeated calls', () => {
-    renderApiRow('LanguageModel', 'Prompt (LanguageModel)', 'available')
-    showPlaygroundButton()
-    showPlaygroundButton()
-    const btns = document.querySelectorAll('[data-row-id="LanguageModel"] [data-btn-playground]')
+    renderApiRow('LanguageDetector', 'Language Detector', 'available')
+    showPlaygroundButton('LanguageDetector')
+    showPlaygroundButton('LanguageDetector')
+    const btns = document.querySelectorAll('[data-row-id="LanguageDetector"] .btn-playground')
     expect(btns.length).toBe(1)
   })
 
-  it('does nothing when the LanguageModel row is absent', () => {
-    expect(() => showPlaygroundButton()).not.toThrow()
+  it('does nothing when the row is absent', () => {
+    expect(() => showPlaygroundButton('LanguageModel')).not.toThrow()
   })
 })
 

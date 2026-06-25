@@ -101,7 +101,7 @@ async function runCheck() {
   }
 
   if (state.apis.find(a => a.id === 'LanguageModel')?.status === 'available') {
-    showPlaygroundButton()
+    showPlaygroundButton('LanguageModel')
   }
 
   for (const pair of state.pairs) {
@@ -221,9 +221,11 @@ function init() {
     if (e.key === 'Enter') document.querySelector('[data-btn-add-pair]')?.click()
   })
 
-  // Open the Playground from the inline button (delegated — button is dynamic).
+  // Open a Playground from its inline button (delegated — buttons are dynamic).
   document.querySelector('[data-status-list]')?.addEventListener('click', (e) => {
-    if (e.target.closest('[data-btn-playground]')) openPlayground()
+    const btn = e.target.closest('.btn-playground')
+    if (!btn) return
+    if (btn.dataset.playgroundFor === 'LanguageModel') openPlayground()
   })
 
   // Run button doubles as Stop while a request is in flight.
