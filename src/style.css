@@ -50,6 +50,21 @@ body {
   font-size: 17px;
   color: var(--muted);
 }
+.app-refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 8px;
+}
+.app-refs a {
+  color: var(--info);
+  text-decoration: none;
+  font-size: 14px;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+.app-refs a:hover { opacity: 1; text-decoration: underline; }
+
 .app-chrome-ver {
   font-size: 15px;
   color: var(--muted);
