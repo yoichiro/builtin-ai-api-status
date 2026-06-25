@@ -17,10 +17,14 @@ import {
   clearPlaygroundResponse,
   appendPlaygroundResponse,
   showPlaygroundError,
+  renderDetectorResults,
+  clearDetectorResults,
+  showDetectorError,
 } from './ui.js'
 
 import { loadPairs, savePairs } from './storage.js'
 import { getParams, runPrompt } from './playground.js'
+import { createDetector, detectLanguages } from './detector.js'
 
 const DEFAULT_PAIRS = [
   { src: 'en', tgt: 'ja' },
@@ -102,6 +106,10 @@ async function runCheck() {
 
   if (state.apis.find(a => a.id === 'LanguageModel')?.status === 'available') {
     showPlaygroundButton('LanguageModel')
+  }
+
+  if (state.apis.find(a => a.id === 'LanguageDetector')?.status === 'available') {
+    showPlaygroundButton('LanguageDetector')
   }
 
   for (const pair of state.pairs) {
@@ -196,6 +204,38 @@ async function runPlayground() {
   }
 }
 
+let ldDetector = null
+let ldDebounceId = null
+
+async function openDetectorPlayground() {
+  const dialog = document.querySelector('[data-ld-playground]')
+  if (!dialog) return
+  document.querySelector('[data-ld-input]').value = ''
+  clearDetectorResults()
+  try {
+    ldDetector = await createDetector()
+  } catch (err) {
+    showDetectorError(err.message)
+  }
+  dialog.showModal()
+}
+
+async function runDetect() {
+  const text = document.querySelector('[data-ld-input]').value.trim()
+  if (!text) { clearDetectorResults(); return }
+  if (!ldDetector) return
+  try {
+    renderDetectorResults(await detectLanguages(ldDetector, text, { max: 5 }))
+  } catch (err) {
+    showDetectorError(err.message)
+  }
+}
+
+function onDetectorInput() {
+  clearTimeout(ldDebounceId)
+  ldDebounceId = setTimeout(runDetect, 250)
+}
+
 function init() {
   detectChromeVersion()
 
@@ -226,6 +266,7 @@ function init() {
     const btn = e.target.closest('.btn-playground')
     if (!btn) return
     if (btn.dataset.playgroundFor === 'LanguageModel') openPlayground()
+    else if (btn.dataset.playgroundFor === 'LanguageDetector') openDetectorPlayground()
   })
 
   // Run button doubles as Stop while a request is in flight.
@@ -237,6 +278,16 @@ function init() {
   // Closing the dialog (✕ or Esc) aborts any in-flight request.
   document.querySelector('[data-playground]')?.addEventListener('close', () => {
     if (pgController) pgController.abort()
+  })
+
+  // Language Detector: debounce input → detect → render.
+  document.querySelector('[data-ld-input]')?.addEventListener('input', onDetectorInput)
+
+  // Closing the detector dialog cancels pending detection and frees the session.
+  document.querySelector('[data-ld-playground]')?.addEventListener('close', () => {
+    clearTimeout(ldDebounceId)
+    ldDetector?.destroy()
+    ldDetector = null
   })
 
   runCheck()
