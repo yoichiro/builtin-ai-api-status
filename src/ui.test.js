@@ -3,6 +3,7 @@ import {
   renderProgress, setDownloadAllButton, showPairError, clearPairError,
   showPlaygroundButton, clearPlaygroundResponse, appendPlaygroundResponse, showPlaygroundError,
   renderDetectorResults, clearDetectorResults, showDetectorError,
+  clearSummary, appendSummary, showSummarizerError,
 } from './ui.js'
 
 function setupDOM() {
@@ -230,5 +231,37 @@ describe('detector result helpers', () => {
     const err = document.querySelector('[data-ld-error]')
     expect(err.hidden).toBe(false)
     expect(err.textContent).toBe('Detection failed')
+  })
+})
+
+describe('summarizer response helpers', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div data-sm-response></div>
+      <div data-sm-error hidden></div>
+    `
+  })
+
+  it('appendSummary appends chunks in order', () => {
+    appendSummary('The ')
+    appendSummary('summary.')
+    expect(document.querySelector('[data-sm-response]').textContent).toBe('The summary.')
+  })
+
+  it('clearSummary empties the response and hides the error', () => {
+    appendSummary('stuff')
+    showSummarizerError('boom')
+    clearSummary()
+    expect(document.querySelector('[data-sm-response]').textContent).toBe('')
+    const err = document.querySelector('[data-sm-error]')
+    expect(err.hidden).toBe(true)
+    expect(err.textContent).toBe('')
+  })
+
+  it('showSummarizerError reveals the error message', () => {
+    showSummarizerError('Summarization failed')
+    const err = document.querySelector('[data-sm-error]')
+    expect(err.hidden).toBe(false)
+    expect(err.textContent).toBe('Summarization failed')
   })
 })

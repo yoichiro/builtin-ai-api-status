@@ -205,3 +205,22 @@ export function showDetectorError(message) {
   err.hidden = false
   err.textContent = message
 }
+
+export function clearSummary() {
+  const res = document.querySelector('[data-sm-response]')
+  if (res) res.textContent = ''
+  const err = document.querySelector('[data-sm-error]')
+  if (err) { err.hidden = true; err.textContent = '' }
+}
+
+export function appendSummary(chunk) {
+  const res = document.querySelector('[data-sm-response]')
+  if (res) res.textContent += chunk
+}
+
+export function showSummarizerError(message) {
+  const err = document.querySelector('[data-sm-error]')
+  if (!err) return
+  err.hidden = false
+  err.textContent = message
+}
