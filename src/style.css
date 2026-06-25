@@ -284,6 +284,8 @@ body {
 /* Playground modal */
 .playground {
   width: min(680px, 92vw);
+  /* Restore the UA centering that the global `* { margin: 0 }` reset cancels. */
+  margin: auto;
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
