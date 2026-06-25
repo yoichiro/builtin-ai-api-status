@@ -137,3 +137,22 @@ export function showPlaygroundButton() {
   btn.textContent = '▶ Playground'
   name.appendChild(btn)
 }
+
+export function clearPlaygroundResponse() {
+  const res = document.querySelector('[data-pg-response]')
+  if (res) res.textContent = ''
+  const err = document.querySelector('[data-pg-error]')
+  if (err) { err.hidden = true; err.textContent = '' }
+}
+
+export function appendPlaygroundResponse(chunk) {
+  const res = document.querySelector('[data-pg-response]')
+  if (res) res.textContent += chunk
+}
+
+export function showPlaygroundError(message) {
+  const err = document.querySelector('[data-pg-error]')
+  if (!err) return
+  err.hidden = false
+  err.textContent = message
+}

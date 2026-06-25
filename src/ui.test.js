@@ -1,7 +1,7 @@
 import {
   getTimestamp, appendLog, renderApiRow, renderPairRow,
   renderProgress, setDownloadAllButton, showPairError, clearPairError,
-  showPlaygroundButton,
+  showPlaygroundButton, clearPlaygroundResponse, appendPlaygroundResponse, showPlaygroundError,
 } from './ui.js'
 
 function setupDOM() {
@@ -152,5 +152,37 @@ describe('showPlaygroundButton', () => {
 
   it('does nothing when the LanguageModel row is absent', () => {
     expect(() => showPlaygroundButton()).not.toThrow()
+  })
+})
+
+describe('playground response helpers', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div data-pg-response></div>
+      <div data-pg-error hidden></div>
+    `
+  })
+
+  it('appendPlaygroundResponse appends chunks in order', () => {
+    appendPlaygroundResponse('Hello')
+    appendPlaygroundResponse(', world')
+    expect(document.querySelector('[data-pg-response]').textContent).toBe('Hello, world')
+  })
+
+  it('clearPlaygroundResponse empties the response and hides the error', () => {
+    appendPlaygroundResponse('stuff')
+    showPlaygroundError('boom')
+    clearPlaygroundResponse()
+    expect(document.querySelector('[data-pg-response]').textContent).toBe('')
+    const err = document.querySelector('[data-pg-error]')
+    expect(err.hidden).toBe(true)
+    expect(err.textContent).toBe('')
+  })
+
+  it('showPlaygroundError reveals the error message', () => {
+    showPlaygroundError('Something failed')
+    const err = document.querySelector('[data-pg-error]')
+    expect(err.hidden).toBe(false)
+    expect(err.textContent).toBe('Something failed')
   })
 })
