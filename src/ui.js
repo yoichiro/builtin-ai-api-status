@@ -125,3 +125,15 @@ export function clearPairError() {
   el.hidden = true
   el.textContent = ''
 }
+
+export function showPlaygroundButton() {
+  const row = document.querySelector('[data-status-list] [data-row-id="LanguageModel"]')
+  if (!row) return
+  const name = row.querySelector('.status-name')
+  if (!name || name.querySelector('[data-btn-playground]')) return
+  const btn = document.createElement('button')
+  btn.dataset.btnPlayground = ''
+  btn.className = 'btn-playground'
+  btn.textContent = '▶ Playground'
+  name.appendChild(btn)
+}

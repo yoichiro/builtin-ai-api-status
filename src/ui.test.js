@@ -1,6 +1,7 @@
 import {
   getTimestamp, appendLog, renderApiRow, renderPairRow,
   renderProgress, setDownloadAllButton, showPairError, clearPairError,
+  showPlaygroundButton,
 } from './ui.js'
 
 function setupDOM() {
@@ -127,5 +128,29 @@ describe('showPairError / clearPairError', () => {
     showPairError('err')
     clearPairError()
     expect(document.querySelector('[data-pair-error]').hidden).toBe(true)
+  })
+})
+
+describe('showPlaygroundButton', () => {
+  beforeEach(setupDOM)
+
+  it('inserts a playground button into the LanguageModel row', () => {
+    renderApiRow('LanguageModel', 'Prompt (LanguageModel)', 'available')
+    showPlaygroundButton()
+    const btn = document.querySelector('[data-row-id="LanguageModel"] [data-btn-playground]')
+    expect(btn).not.toBeNull()
+    expect(btn.textContent).toContain('Playground')
+  })
+
+  it('does not duplicate the button on repeated calls', () => {
+    renderApiRow('LanguageModel', 'Prompt (LanguageModel)', 'available')
+    showPlaygroundButton()
+    showPlaygroundButton()
+    const btns = document.querySelectorAll('[data-row-id="LanguageModel"] [data-btn-playground]')
+    expect(btns.length).toBe(1)
+  })
+
+  it('does nothing when the LanguageModel row is absent', () => {
+    expect(() => showPlaygroundButton()).not.toThrow()
   })
 })
