@@ -156,3 +156,52 @@ export function showPlaygroundError(message) {
   err.hidden = false
   err.textContent = message
 }
+
+const LANGUAGE_NAMES = (() => {
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'language' })
+  } catch {
+    return null
+  }
+})()
+
+function languageName(code) {
+  if (code === 'und') return 'Unknown'
+  try {
+    return LANGUAGE_NAMES?.of(code) ?? code
+  } catch {
+    return code
+  }
+}
+
+export function renderDetectorResults(results) {
+  const container = document.querySelector('[data-ld-results]')
+  if (!container) return
+  container.innerHTML = ''
+  for (const { language, confidence } of results) {
+    const pct = Math.round(confidence * 100)
+    const row = document.createElement('div')
+    row.className = 'detector-row'
+    row.innerHTML = `
+      <div class="detector-bar"><div class="detector-fill" style="width:${pct}%"></div></div>
+      <span class="detector-code">${language}</span>
+      <span class="detector-name">${languageName(language)}</span>
+      <span class="detector-pct">${pct}%</span>
+    `
+    container.appendChild(row)
+  }
+}
+
+export function clearDetectorResults() {
+  const res = document.querySelector('[data-ld-results]')
+  if (res) res.innerHTML = ''
+  const err = document.querySelector('[data-ld-error]')
+  if (err) { err.hidden = true; err.textContent = '' }
+}
+
+export function showDetectorError(message) {
+  const err = document.querySelector('[data-ld-error]')
+  if (!err) return
+  err.hidden = false
+  err.textContent = message
+}

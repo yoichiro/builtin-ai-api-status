@@ -2,6 +2,7 @@ import {
   getTimestamp, appendLog, renderApiRow, renderPairRow,
   renderProgress, setDownloadAllButton, showPairError, clearPairError,
   showPlaygroundButton, clearPlaygroundResponse, appendPlaygroundResponse, showPlaygroundError,
+  renderDetectorResults, clearDetectorResults, showDetectorError,
 } from './ui.js'
 
 function setupDOM() {
@@ -185,5 +186,49 @@ describe('playground response helpers', () => {
     const err = document.querySelector('[data-pg-error]')
     expect(err.hidden).toBe(false)
     expect(err.textContent).toBe('Something failed')
+  })
+})
+
+describe('detector result helpers', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div data-ld-results></div>
+      <div data-ld-error hidden></div>
+    `
+  })
+
+  it('renders one row per result with code and percentage', () => {
+    renderDetectorResults([
+      { language: 'fr', confidence: 0.82 },
+      { language: 'en', confidence: 0.09 },
+    ])
+    const rows = document.querySelectorAll('[data-ld-results] .detector-row')
+    expect(rows.length).toBe(2)
+    expect(rows[0].textContent).toContain('fr')
+    expect(rows[0].textContent).toContain('82%')
+  })
+
+  it('sizes the confidence bar fill to the percentage', () => {
+    renderDetectorResults([{ language: 'fr', confidence: 0.82 }])
+    const fill = document.querySelector('[data-ld-results] .detector-fill')
+    expect(fill).not.toBeNull()
+    expect(fill.style.width).toBe('82%')
+  })
+
+  it('clearDetectorResults empties results and hides the error', () => {
+    renderDetectorResults([{ language: 'fr', confidence: 0.82 }])
+    showDetectorError('boom')
+    clearDetectorResults()
+    expect(document.querySelector('[data-ld-results]').textContent).toBe('')
+    const err = document.querySelector('[data-ld-error]')
+    expect(err.hidden).toBe(true)
+    expect(err.textContent).toBe('')
+  })
+
+  it('showDetectorError reveals the error message', () => {
+    showDetectorError('Detection failed')
+    const err = document.querySelector('[data-ld-error]')
+    expect(err.hidden).toBe(false)
+    expect(err.textContent).toBe('Detection failed')
   })
 })
